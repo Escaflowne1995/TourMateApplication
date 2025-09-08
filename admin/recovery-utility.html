@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destination Recovery Utility</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f7fafc;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 { 
+            color: #e53e3e; 
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .subtitle {
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        .warning-box {
+            background: #fff5f5;
+            border: 2px solid #feb2b2;
+            color: #c53030;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        .info-box {
+            background: #ebf8ff;
+            border: 2px solid #90cdf4;
+            color: #2c5282;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .success-box {
+            background: #f0fff4;
+            border: 2px solid #9ae6b4;
+            color: #2f855a;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .section {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #4299e1;
+        }
+        .section h3 {
+            margin: 0 0 15px 0;
+            color: #2d3748;
+        }
+        .deleted-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .deleted-item:hover {
+            border-color: #cbd5e0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .item-info h4 {
+            margin: 0 0 5px 0;
+            color: #2d3748;
+        }
+        .item-meta {
+            font-size: 14px;
+            color: #718096;
+        }
+        button {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #3182ce;
+        }
+        button.danger {
+            background: #e53e3e;
+        }
+        button.danger:hover {
+            background: #c53030;
+        }
+        button.success {
+            background: #38a169;
+        }
+        button.success:hover {
+            background: #2f855a;
+        }
+        .sql-box {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #4299e1;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            color: #718096;
+            font-size: 14px;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            🔄 Destination Recovery Utility
+        </h1>
+        <p class="subtitle">Manage and recover permanently deleted destinations</p>
+
+        <div class="warning-box">
+            <strong>⚠️ Important:</strong> This utility helps you recover destinations that were permanently deleted. 
+            Make sure you have run the backup setup SQL script before using permanent deletes.
+        </div>
+
+        <div class="section">
+            <h3>📊 Backup System Status</h3>
+            <p>First, let's check if your backup system is properly configured:</p>
+            
+            <button onclick="checkBackupSystem()">Check Backup System</button>
+            <button onclick="setupBackupSystem()">Setup Backup System</button>
+            
+            <div id="backupStatus" class="hidden">
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalDeleted">-</div>
+                        <div class="stat-label">Total Deleted</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="recentDeleted">-</div>
+                        <div class="stat-label">Deleted This Week</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="canRestore">-</div>
+                        <div class="stat-label">Restorable</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🗑️ Recently Deleted Destinations</h3>
+            <p>These destinations were permanently deleted and can be restored:</p>
+            
+            <button onclick="loadDeletedDestinations()">Load Deleted Destinations</button>
+            <button onclick="loadDeletedDestinations(30)">Show Last 30 Days</button>
+            
+            <div id="deletedDestinations">
+                <p class="item-meta">Click "Load Deleted Destinations" to see deleted items...</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>⚡ Quick Recovery Options</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <label for="destinationId" style="display: block; margin-bottom: 5px; font-weight: 500;">Destination ID to Restore:</label>
+                    <input type="text" id="destinationId" placeholder="Enter destination UUID" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                </div>
+                <div style="display: flex; align-items: end;">
+                    <button onclick="restoreDestination()" class="success">Restore Destination</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🛠️ Manual SQL Commands</h3>
+            <p>Copy these commands to run directly in Supabase SQL Editor:</p>
+            
+            <h4>Setup Backup System:</h4>
+            <div class="sql-box">-- Run this in Supabase SQL Editor to setup backup system
+-- Copy from: admin/backup-before-permanent-delete.sql</div>
+            
+            <h4>View All Deleted Destinations:</h4>
+            <div class="sql-box">SELECT 
+    original_id,
+    name,
+    location,
+    category,
+    deleted_at,
+    deleted_by
+FROM destinations_deleted_backup 
+ORDER BY deleted_at DESC;</div>
+            
+            <h4>Restore Specific Destination:</h4>
+            <div class="sql-box">-- Replace 'your-id-here' with actual destination ID
+SELECT * FROM restore_deleted_destination('your-id-here');</div>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Initialize Supabase (you'll need to replace with your credentials)
+        const supabaseUrl = 'YOUR_SUPABASE_URL';
+        const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+        
+        let supabase;
+        
+        try {
+            if (window.supabase) {
+                supabase = window.supabase;
+                console.log('Using existing Supabase connection');
+            } else {
+                // supabase = createClient(supabaseUrl, supabaseKey);
+                console.log('You need to configure Supabase credentials or run this from admin panel');
+            }
+        } catch (error) {
+            console.error('Supabase connection error:', error);
+        }
+
+        async function checkBackupSystem() {
+            if (!supabase) {
+                showResult('error', 'Supabase connection not available. Run this from your admin panel or configure credentials.');
+                return;
+            }
+
+            try {
+                // Check if backup table exists
+                const { data, error } = await supabase
+                    .from('destinations_deleted_backup')
+                    .select('*', { count: 'exact', head: true });
+
+                if (error) {
+                    if (error.message.includes('relation') && error.message.includes('does not exist')) {
+                        showResult('warning', 'Backup system not found. Click "Setup Backup System" to install it.');
+                        return;
+                    }
+                    throw error;
+                }
+
+                // Get stats
+                const { data: stats, error: statsError } = await supabase
+                    .from('destinations_deleted_backup')
+                    .select('*');
+
+                if (statsError) throw statsError;
+
+                const recentDeleted = stats.filter(item => {
+                    const deletedDate = new Date(item.deleted_at);
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    return deletedDate > weekAgo;
+                }).length;
+
+                document.getElementById('totalDeleted').textContent = stats.length;
+                document.getElementById('recentDeleted').textContent = recentDeleted;
+                document.getElementById('canRestore').textContent = stats.length;
+                document.getElementById('backupStatus').classList.remove('hidden');
+
+                showResult('success', `Backup system is working! Found ${stats.length} deleted destinations that can be restored.`);
+
+            } catch (error) {
+                showResult('error', `Error checking backup system: ${error.message}`);
+            }
+        }
+
+        async function setupBackupSystem() {
+            showResult('info', 'To setup the backup system, copy and run the SQL script from admin/backup-before-permanent-delete.sql in your Supabase SQL Editor.');
+        }
+
+        async function loadDeletedDestinations(days = 7) {
+            if (!supabase) {
+                showResult('error', 'Supabase connection not available.');
+                return;
+            }
+
+            try {
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - days);
+
+                const { data, error } = await supabase
+                    .from('destinations_deleted_backup')
+                    .select('*')
+                    .gte('deleted_at', cutoffDate.toISOString())
+                    .order('deleted_at', { ascending: false });
+
+                if (error) throw error;
+
+                const container = document.getElementById('deletedDestinations');
+                
+                if (data.length === 0) {
+                    container.innerHTML = `<p class="item-meta">No deleted destinations found in the last ${days} days.</p>`;
+                    return;
+                }
+
+                container.innerHTML = data.map(item => `
+                    <div class="deleted-item">
+                        <div class="item-info">
+                            <h4>${item.name}</h4>
+                            <div class="item-meta">
+                                📍 ${item.location} • 🗂️ ${item.category}<br>
+                                🗑️ Deleted: ${new Date(item.deleted_at).toLocaleString()}<br>
+                                🆔 ID: ${item.original_id}
+                            </div>
+                        </div>
+                        <button onclick="restoreDestination('${item.original_id}')" class="success">
+                            Restore
+                        </button>
+                    </div>
+                `).join('');
+
+                showResult('success', `Found ${data.length} deleted destinations from the last ${days} days.`);
+
+            } catch (error) {
+                showResult('error', `Error loading deleted destinations: ${error.message}`);
+            }
+        }
+
+        async function restoreDestination(destinationId = null) {
+            if (!supabase) {
+                showResult('error', 'Supabase connection not available.');
+                return;
+            }
+
+            const id = destinationId || document.getElementById('destinationId').value.trim();
+            
+            if (!id) {
+                showResult('error', 'Please enter a destination ID to restore.');
+                return;
+            }
+
+            try {
+                // Call the restore function
+                const { data, error } = await supabase.rpc('restore_deleted_destination', {
+                    original_destination_id: id
+                });
+
+                if (error) throw error;
+
+                if (data && data.length > 0 && data[0].success) {
+                    showResult('success', `Success: ${data[0].message}`);
+                    document.getElementById('destinationId').value = '';
+                } else {
+                    showResult('error', data[0]?.message || 'Restore failed for unknown reason.');
+                }
+
+            } catch (error) {
+                showResult('error', `Error restoring destination: ${error.message}`);
+            }
+        }
+
+        function showResult(type, message) {
+            const results = document.getElementById('results');
+            const className = type === 'success' ? 'success-box' : 
+                             type === 'warning' ? 'warning-box' : 
+                             type === 'info' ? 'info-box' : 'warning-box';
+            
+            results.innerHTML = `<div class="${className}">${message}</div>`;
+            results.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Auto-check backup system on load if Supabase is available
+        if (supabase) {
+            setTimeout(checkBackupSystem, 1000);
+        }
+    </script>
+</body>
+</html>

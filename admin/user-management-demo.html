@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management Demo - Tourist App Admin</title>
+    <link rel="stylesheet" href="web-interface/styles/AdminApp.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <!-- Load Admin Configuration -->
+    <script src="config/adminConfig.js"></script>
+    
+    <!-- Load Services -->
+    <script src="services/adminService.js"></script>
+    <script src="services/userManagement.js"></script>
+    
+    <!-- Load Components -->
+    <script src="web-interface/components/UserEditModal.js"></script>
+    <script src="web-interface/components/UserManagement.js"></script>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // Mock admin user for demo
+        const mockAdmin = {
+            id: 'admin_1',
+            name: 'Admin User',
+            email: 'admin@touristapp.com',
+            role: 'admin'
+        };
+        
+        // Initialize admin service
+        window.AdminService.login(mockAdmin);
+        
+        function DemoApp() {
+            return (
+                <div className="admin-container">
+                    <div className="admin-main" style={{ marginLeft: 0, padding: '2rem' }}>
+                        <div style={{ marginBottom: '2rem' }}>
+                            <h1 style={{ fontSize: '2.5rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--primary-color)' }}>
+                                🏖️ Tourist App Admin
+                            </h1>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>
+                                User Management Demo - Complete CRUD Operations
+                            </p>
+                        </div>
+                        
+                        <div style={{ 
+                            background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
+                            color: 'white',
+                            padding: '1.5rem',
+                            borderRadius: 'var(--radius-lg)',
+                            marginBottom: '2rem'
+                        }}>
+                            <h3 style={{ margin: 0, marginBottom: '0.5rem' }}>
+                                <i className="fas fa-users"></i> User Management Features
+                            </h3>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+                                <div>
+                                    <i className="fas fa-plus-circle"></i> Add New Users
+                                </div>
+                                <div>
+                                    <i className="fas fa-edit"></i> Edit User Information
+                                </div>
+                                <div>
+                                    <i className="fas fa-eye"></i> View User Details
+                                </div>
+                                <div>
+                                    <i className="fas fa-user-slash"></i> Deactivate Users
+                                </div>
+                                <div>
+                                    <i className="fas fa-user-check"></i> Restore Users
+                                </div>
+                                <div>
+                                    <i className="fas fa-download"></i> Export User Data
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <window.UserManagement currentAdmin={mockAdmin} />
+                    </div>
+                </div>
+            );
+        }
+        
+        ReactDOM.render(<DemoApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>

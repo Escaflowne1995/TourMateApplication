@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cebu Tourist App - Admin Panel</title>
+    <link rel="stylesheet" href="styles/AdminApp.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div id="admin-root"></div>
+
+    <!-- Service Scripts -->
+    <script src="../config/supabaseClient.js"></script>
+    <script src="../services/adminServiceSimple.js"></script>
+    <script src="../services/userManagementSupabase.js?v=2024"></script>
+    <script src="../services/destinationServiceSupabase.js"></script>
+    <script src="../services/delicaciesServiceSupabase.js?v=2024"></script>
+    <script src="../services/analyticsService.js"></script>
+    <script src="../config/adminConfig.js"></script>
+
+    <!-- Component Scripts -->
+    <script type="text/babel" src="components/AdminLogin.js"></script>
+    <script type="text/babel" src="components/AdminDashboard.js"></script>
+    <script type="text/babel" src="components/UserManagement.js"></script>
+    <script type="text/babel" src="components/DestinationManagement.js"></script>
+    <script type="text/babel" src="components/DelicaciesManagement.js"></script>
+    <script type="text/babel" src="components/UserEditModal.js"></script>
+    <script type="text/babel" src="components/DestinationModal.js"></script>
+    <script type="text/babel" src="components/DelicacyModal.js"></script>
+    <script type="text/babel" src="components/SupabaseConnectionTest.js"></script>
+    <script type="text/babel" src="components/AdminApp.js"></script>
+
+    <script type="text/babel">
+        ReactDOM.render(<AdminApp />, document.getElementById('admin-root'));
+    </script>
+</body>
+</html>

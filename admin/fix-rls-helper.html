@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RLS Error Fix Helper</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #e53e3e; margin-bottom: 20px; }
+        h2 { color: #2d3748; margin-top: 30px; }
+        .error-box {
+            background: #fed7d7;
+            border: 1px solid #feb2b2;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .solution-box {
+            background: #c6f6d5;
+            border: 1px solid #9ae6b4;
+            color: #2f855a;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .sql-box {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            margin: 15px 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .step {
+            background: #ebf8ff;
+            border-left: 4px solid #3182ce;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .step h3 {
+            margin: 0 0 10px 0;
+            color: #2c5282;
+        }
+        button {
+            background: #3182ce;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px 10px 0;
+        }
+        button:hover {
+            background: #2c5282;
+        }
+        .copy-button {
+            background: #38a169;
+            font-size: 12px;
+            padding: 5px 10px;
+        }
+        .copy-button:hover {
+            background: #2f855a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 RLS Error Fix Helper</h1>
+        
+        <div class="error-box">
+            ❌ Error: "new row violates row-level security policy for table 'destination_audit'"
+        </div>
+
+        <p>This error occurs when the admin panel tries to log activities but RLS (Row Level Security) blocks access to audit tables. Here are the solutions:</p>
+
+        <div class="step">
+            <h3>📋 Step 1: Quick SQL Fix (Recommended)</h3>
+            <p>Copy and paste this SQL code into your <strong>Supabase SQL Editor</strong>:</p>
+            
+            <button class="copy-button" onclick="copyToClipboard('sql1')">📋 Copy SQL</button>
+            <div class="sql-box" id="sql1">-- Quick fix for destination_audit RLS error
+-- Run this in your Supabase SQL Editor
+
+-- Fix destination_audit table
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'destination_audit') THEN
+        -- Create destination_audit table if it doesn't exist
+        CREATE TABLE destination_audit (
+            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+            destination_id UUID,
+            action VARCHAR(50) NOT NULL,
+            admin_id VARCHAR(255),
+            admin_email VARCHAR(255),
+            old_data JSONB,
+            new_data JSONB,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+        RAISE NOTICE 'destination_audit table created';
+    END IF;
+END $$;
+
+-- Disable RLS on all audit tables
+ALTER TABLE destination_audit DISABLE ROW LEVEL SECURITY;
+GRANT ALL ON destination_audit TO anon;
+GRANT ALL ON destination_audit TO authenticated;
+
+-- Also fix admin_audit_log if it exists
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'admin_audit_log') THEN
+        ALTER TABLE admin_audit_log DISABLE ROW LEVEL SECURITY;
+        GRANT ALL ON admin_audit_log TO anon;
+        GRANT ALL ON admin_audit_log TO authenticated;
+    END IF;
+END $$;
+
+-- Ensure destinations table works
+ALTER TABLE destinations DISABLE ROW LEVEL SECURITY;
+GRANT ALL ON destinations TO anon;
+GRANT ALL ON destinations TO authenticated;
+
+-- Test the fix
+INSERT INTO destination_audit (action, admin_id) VALUES ('test_rls_fix', 'test_admin');
+DELETE FROM destination_audit WHERE action = 'test_rls_fix';
+
+SELECT 'RLS FIX COMPLETED - Admin panel should now work!' as status;</div>
+        </div>
+
+        <div class="step">
+            <h3>🛠️ Step 2: Apply JavaScript Patch (Temporary Fix)</h3>
+            <p>While in your admin panel, open browser console (F12) and paste this code:</p>
+            
+            <button class="copy-button" onclick="copyToClipboard('js1')">📋 Copy JavaScript</button>
+            <div class="sql-box" id="js1">// Patch AdminService to handle RLS errors gracefully
+if (window.AdminService && typeof window.AdminService.logActivity === 'function') {
+  const originalLogActivity = window.AdminService.logActivity;
+  
+  window.AdminService.logActivity = async function(action, details = {}) {
+    try {
+      if (!window.supabase || !this.getCurrentAdmin()) {
+        console.log('📝 Activity logged locally:', action);
+        return;
+      }
+
+      const currentAdmin = this.getCurrentAdmin();
+      const logEntry = {
+        admin_id: currentAdmin.id,
+        admin_email: currentAdmin.email,
+        action,
+        table_name: details.table_name || null,
+        record_id: details.record_id || null,
+        old_data: details.old_data || null,
+        new_data: details.new_data || null,
+        user_agent: navigator.userAgent
+      };
+
+      // Try different audit table names
+      const auditTables = ['admin_audit_log', 'destination_audit'];
+      
+      for (const tableName of auditTables) {
+        try {
+          await window.supabase.from(tableName).insert(logEntry);
+          console.log(`📝 Logged to ${tableName}:`, action);
+          return;
+        } catch (err) {
+          continue;
+        }
+      }
+      
+      console.log('📝 Activity logged locally only:', action);
+      
+    } catch (error) {
+      console.warn('Activity logging failed (operation continues):', error.message);
+    }
+  };
+  
+  console.log('✅ RLS patch applied - try adding/deleting destinations now!');
+} else {
+  console.error('❌ AdminService not found');
+}</div>
+        </div>
+
+        <div class="step">
+            <h3>🧪 Step 3: Test the Fix</h3>
+            <p>After applying the SQL fix:</p>
+            <ol>
+                <li>Refresh your admin panel</li>
+                <li>Try adding a new destination</li>
+                <li>Try deleting a destination</li>
+                <li>Check if the errors are gone</li>
+            </ol>
+        </div>
+
+        <div class="solution-box">
+            <strong>✅ Expected Result:</strong>
+            <ul>
+                <li>No more RLS policy violation errors</li>
+                <li>Destinations can be added/edited/deleted without errors</li>
+                <li>Real-time sync should work between admin and mobile</li>
+                <li>Activity logging works properly</li>
+            </ul>
+        </div>
+
+        <h2>📚 Additional Resources</h2>
+        <p>If you need more comprehensive fixes, check these files in your project:</p>
+        <ul>
+            <li><code>admin/fix-destination-audit-rls.sql</code> - Detailed SQL fix</li>
+            <li><code>admin/adminservice-rls-patch.js</code> - JavaScript patch</li>
+        </ul>
+
+        <h2>🆘 Still Having Issues?</h2>
+        <p>If the error persists:</p>
+        <ol>
+            <li>Check your Supabase console for any remaining RLS policies</li>
+            <li>Verify the audit tables exist in your database</li>
+            <li>Try the temporary JavaScript patch for immediate relief</li>
+            <li>Consider disabling audit logging entirely if not needed</li>
+        </ol>
+    </div>
+
+    <script>
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showCopySuccess();
+                });
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                document.execCommand('copy');
+                textArea.remove();
+                showCopySuccess();
+            }
+        }
+
+        function showCopySuccess() {
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = '✅ Copied!';
+            button.style.background = '#38a169';
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.background = '#38a169';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

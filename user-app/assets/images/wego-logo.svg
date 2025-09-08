@@ -1,0 +1,76 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sun -->
+  <circle cx="80" cy="60" r="35" fill="url(#sunGradient)"/>
+  
+  <!-- Tropical Leaves Background -->
+  <g transform="translate(250, 30)">
+    <!-- Large leaf 1 -->
+    <ellipse cx="0" cy="0" rx="45" ry="80" fill="#4a7c59" transform="rotate(15)"/>
+    <path d="M-10,-60 Q0,-40 10,-60" stroke="#6db33f" stroke-width="2" fill="none"/>
+    
+    <!-- Large leaf 2 -->
+    <ellipse cx="20" cy="10" rx="35" ry="65" fill="#5d8c4e" transform="rotate(-10)"/>
+    <path d="M15,-45 Q25,-25 35,-45" stroke="#7bc142" stroke-width="2" fill="none"/>
+    
+    <!-- Medium leaf -->
+    <ellipse cx="-25" cy="35" rx="25" ry="50" fill="#6db33f" transform="rotate(25)"/>
+    <path d="M-35,10 Q-25,25 -15,10" stroke="#8fd542" stroke-width="2" fill="none"/>
+    
+    <!-- Small leaf -->
+    <ellipse cx="45" cy="45" rx="20" ry="35" fill="#7bc142" transform="rotate(-20)"/>
+  </g>
+  
+  <!-- Globe -->
+  <g transform="translate(150, 100)">
+    <!-- Globe base circle -->
+    <circle cx="0" cy="0" r="60" fill="url(#globeGradient)" stroke="#ffffff" stroke-width="3"/>
+    
+    <!-- Continents -->
+    <!-- North America -->
+    <path d="M-40,-20 Q-30,-35 -15,-30 Q0,-25 5,-15 Q-5,-5 -25,0 Q-45,-5 -40,-20" fill="#ff8c42"/>
+    
+    <!-- South America -->
+    <path d="M-20,10 Q-10,5 -5,20 Q-15,45 -25,40 Q-30,25 -20,10" fill="#ff8c42"/>
+    
+    <!-- Europe -->
+    <path d="M-10,-35 Q5,-40 15,-35 Q10,-25 0,-25 Q-10,-30 -10,-35" fill="#ff8c42"/>
+    
+    <!-- Africa -->
+    <path d="M0,-15 Q15,-10 20,5 Q25,25 15,35 Q5,30 0,15 Q-5,0 0,-15" fill="#ff8c42"/>
+    
+    <!-- Asia -->
+    <path d="M20,-25 Q35,-30 45,-15 Q50,0 40,15 Q30,10 25,-5 Q20,-15 20,-25" fill="#ff8c42"/>
+    
+    <!-- Australia -->
+    <path d="M25,25 Q35,20 40,30 Q35,35 25,30 Q20,25 25,25" fill="#ff8c42"/>
+  </g>
+  
+  <!-- Airplane -->
+  <g transform="translate(320, 120)">
+    <path d="M0,0 L-15,-8 L-25,-5 L-20,0 L-25,5 L-15,8 L0,0 Z" fill="#2196f3"/>
+    <path d="M-8,-3 L-8,3 L-18,8 L-18,5 L-12,0 L-18,-5 L-18,-8 L-8,-3 Z" fill="#1976d2"/>
+    <circle cx="-5" cy="0" r="1" fill="#ffffff"/>
+  </g>
+  
+  <!-- WEGO Text -->
+  <g transform="translate(50, 230)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#2c3e50">
+      WEGO
+    </text>
+  </g>
+  
+  <!-- Gradients -->
+  <defs>
+    <radialGradient id="sunGradient" cx="0.3" cy="0.3">
+      <stop offset="0%" stop-color="#ffd54f"/>
+      <stop offset="50%" stop-color="#ffb74d"/>
+      <stop offset="100%" stop-color="#ff8a65"/>
+    </radialGradient>
+    
+    <radialGradient id="globeGradient" cx="0.3" cy="0.3">
+      <stop offset="0%" stop-color="#81d4fa"/>
+      <stop offset="50%" stop-color="#42a5f5"/>
+      <stop offset="100%" stop-color="#1e88e5"/>
+    </radialGradient>
+  </defs>
+</svg> 

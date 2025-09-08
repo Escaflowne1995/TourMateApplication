@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destinations Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .test { margin: 10px 0; padding: 15px; background: white; border-radius: 5px; border-left: 4px solid #ddd; }
+        .success { border-left-color: #28a745; }
+        .error { border-left-color: #dc3545; }
+        .warning { border-left-color: #ffc107; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        button { padding: 8px 16px; margin: 5px; border: none; border-radius: 3px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Destinations Debug Tool</h1>
+    <p>This tool will help identify why destinations aren't loading in the admin panel.</p>
+    
+    <button class="btn-primary" onclick="runAllTests()">Run All Tests</button>
+    <button class="btn-danger" onclick="clearResults()">Clear Results</button>
+    
+    <div id="results"></div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        // Same Supabase configuration as admin panel
+        const SUPABASE_URL = 'https://huzmuglxzkaztzxjerym.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1em11Z2x4emthenR6eGplcnltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNTAwOTUsImV4cCI6MjA3MjYyNjA5NX0.Z4kYsI4OIOvMo1o8uKg6ckBpu2LDAA7q6iKReJUftHw';
+        
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        function addResult(title, status, message, details = null) {
+            const resultsDiv = document.getElementById('results');
+            const testDiv = document.createElement('div');
+            testDiv.className = `test ${status}`;
+            
+            let html = `<h3>${title}</h3><p>${message}</p>`;
+            if (details) {
+                html += `<details><summary>Technical Details</summary><pre>${JSON.stringify(details, null, 2)}</pre></details>`;
+            }
+            
+            testDiv.innerHTML = html;
+            resultsDiv.appendChild(testDiv);
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        async function testSupabaseConnection() {
+            try {
+                const { data, error } = await supabase
+                    .from('destinations')
+                    .select('count', { count: 'exact', head: true });
+                
+                if (error) {
+                    if (error.message.includes('relation') && error.message.includes('does not exist')) {
+                        addResult(
+                            '❌ Table Missing', 
+                            'error', 
+                            'The destinations table does not exist in your database.',
+                            { error: error.message, solution: 'Run the admin-supabase-setup.sql migration' }
+                        );
+                    } else if (error.message.includes('policy') || error.message.includes('RLS')) {
+                        addResult(
+                            '🔒 RLS Blocking Access', 
+                            'error', 
+                            'Row Level Security is blocking access to the destinations table.',
+                            { 
+                                error: error.message, 
+                                solution: 'Run this SQL: ALTER TABLE destinations DISABLE ROW LEVEL SECURITY;' 
+                            }
+                        );
+                    } else {
+                        addResult(
+                            '❌ Database Error', 
+                            'error', 
+                            'Unknown database error occurred.',
+                            { error: error.message }
+                        );
+                    }
+                } else {
+                    addResult(
+                        '✅ Database Connection', 
+                        'success', 
+                        'Successfully connected to Supabase and can access destinations table.',
+                        { count: data }
+                    );
+                }
+            } catch (err) {
+                addResult(
+                    '❌ Connection Failed', 
+                    'error', 
+                    'Failed to connect to Supabase.',
+                    { error: err.message }
+                );
+            }
+        }
+        
+        async function testDataRetrieval() {
+            try {
+                const { data, error } = await supabase
+                    .from('destinations')
+                    .select('*')
+                    .limit(5);
+                
+                if (error) {
+                    addResult(
+                        '❌ Data Retrieval Failed', 
+                        'error', 
+                        'Cannot retrieve destination data.',
+                        { error: error.message }
+                    );
+                } else {
+                    if (data && data.length > 0) {
+                        addResult(
+                            '✅ Data Retrieved', 
+                            'success', 
+                            `Successfully retrieved ${data.length} destinations.`,
+                            { sampleData: data[0] }
+                        );
+                    } else {
+                        addResult(
+                            '⚠️ No Data', 
+                            'warning', 
+                            'Destinations table exists but contains no data.',
+                            { solution: 'Add some destinations or run a data seed script' }
+                        );
+                    }
+                }
+            } catch (err) {
+                addResult(
+                    '❌ Retrieval Error', 
+                    'error', 
+                    'Error while trying to retrieve destinations.',
+                    { error: err.message }
+                );
+            }
+        }
+        
+        async function testRLSPolicies() {
+            try {
+                // Test if we can insert (this will fail if RLS is enabled and blocking)
+                const testData = {
+                    name: 'Test Destination',
+                    description: 'Test description',
+                    location: 'Test location',
+                    category: 'Cultural Sites'
+                };
+                
+                const { data, error } = await supabase
+                    .from('destinations')
+                    .insert(testData)
+                    .select();
+                
+                if (error) {
+                    if (error.message.includes('policy') || error.message.includes('RLS')) {
+                        addResult(
+                            '🔒 RLS Insert Blocked', 
+                            'error', 
+                            'RLS policies are preventing data insertion.',
+                            { 
+                                error: error.message,
+                                solution: 'Either disable RLS or update policies to allow admin access'
+                            }
+                        );
+                    } else {
+                        addResult(
+                            '⚠️ Insert Failed', 
+                            'warning', 
+                            'Insert failed for other reasons (this might be expected).',
+                            { error: error.message }
+                        );
+                    }
+                } else {
+                    // Clean up test data
+                    await supabase.from('destinations').delete().eq('id', data[0].id);
+                    addResult(
+                        '✅ RLS Allows Access', 
+                        'success', 
+                        'RLS policies allow data operations.',
+                        null
+                    );
+                }
+            } catch (err) {
+                addResult(
+                    '❌ RLS Test Failed', 
+                    'error', 
+                    'Could not test RLS policies.',
+                    { error: err.message }
+                );
+            }
+        }
+        
+        async function runAllTests() {
+            clearResults();
+            addResult('🚀 Starting Tests', 'success', 'Running diagnostic tests...');
+            
+            await testSupabaseConnection();
+            await testDataRetrieval();
+            await testRLSPolicies();
+            
+            addResult('✅ Tests Complete', 'success', 'All diagnostic tests completed. Check results above.');
+        }
+    </script>
+</body>
+</html>
