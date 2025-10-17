@@ -83,7 +83,7 @@ const LanguageScreen = ({ navigation }) => {
           <Ionicons 
             name="checkmark-circle" 
             size={24} 
-            color="#A855F7"
+            color="#FF6B35"
             accessible={false}
             style={styles.checkIcon}
           />
@@ -191,7 +191,7 @@ const getStyles = (colors, isDarkMode) => StyleSheet.create({
   },
   selectedLanguageItem: {
     backgroundColor: colors.surface,
-    borderColor: '#A855F7',
+    borderColor: '#FF6B35',
     borderWidth: 2,
   },
   languageContent: {
@@ -209,14 +209,14 @@ const getStyles = (colors, isDarkMode) => StyleSheet.create({
     marginBottom: 4,
   },
   selectedLanguageName: {
-    color: '#A855F7',
+    color: '#FF6B35',
   },
   languageNative: {
     fontSize: 14,
     color: colors.textSecondary,
   },
   selectedLanguageNative: {
-    color: '#A855F7',
+    color: '#FF6B35',
   },
   checkIcon: {
     marginLeft: 10,

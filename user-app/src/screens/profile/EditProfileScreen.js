@@ -554,7 +554,7 @@ const getStyles = (colors, isDarkMode) => StyleSheet.create({
   saveButtonTopText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#377DFF',
+    color: '#FF6B35',
   },
   profileImageSection: {
     alignItems: 'center',
@@ -577,7 +577,7 @@ const getStyles = (colors, isDarkMode) => StyleSheet.create({
     alignItems: 'center',
   },
   uploadPhotoText: {
-    color: '#377DFF',
+    color: '#FF6B35',
     fontWeight: '600',
     fontSize: 16,
     marginTop: 10,
@@ -628,7 +628,7 @@ const getStyles = (colors, isDarkMode) => StyleSheet.create({
   },
   saveButton: {
     padding: 16,
-    backgroundColor: '#377DFF',
+    backgroundColor: '#FF6B35',
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 24,

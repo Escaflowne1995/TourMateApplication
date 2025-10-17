@@ -118,7 +118,7 @@ const FavoriteSpotsScreen = ({ navigation }) => {
             <Ionicons 
               name="heart" 
               size={24} 
-              color="#A855F7"
+              color="#FF6B35"
               accessible={false}
             />
           </TouchableOpacity>
@@ -129,7 +129,7 @@ const FavoriteSpotsScreen = ({ navigation }) => {
             <Ionicons 
               name="star" 
               size={16} 
-              color="#A855F7"
+              color="#FF6B35"
               accessible={false}
             />
             <Text style={styles.rating}>{item.rating || '0.0'}</Text>
@@ -346,7 +346,7 @@ const getStyles = (colors, isDarkMode) => StyleSheet.create({
     lineHeight: 22,
   },
   exploreButton: {
-    backgroundColor: '#A855F7',
+    backgroundColor: '#FF6B35',
     paddingHorizontal: 30,
     paddingVertical: 15,
     borderRadius: 25,

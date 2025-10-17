@@ -162,7 +162,7 @@ const MyReviewsScreen = ({ navigation }) => {
             <Ionicons 
               name="heart-outline" 
               size={16} 
-              color="#A855F7"
+              color="#FF6B35"
               accessible={false}
             />
             <Text 
@@ -415,7 +415,7 @@ const getStyles = (colors, isDarkMode) => StyleSheet.create({
     lineHeight: 22,
   },
   exploreButton: {
-    backgroundColor: '#A855F7',
+    backgroundColor: '#FF6B35',
     paddingHorizontal: 30,
     paddingVertical: 15,
     borderRadius: 25,

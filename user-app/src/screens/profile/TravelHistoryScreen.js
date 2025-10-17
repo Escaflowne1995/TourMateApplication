@@ -366,7 +366,7 @@ const getStyles = (colors, isDarkMode) => StyleSheet.create({
     lineHeight: 22,
   },
   exploreButton: {
-    backgroundColor: '#A855F7',
+    backgroundColor: '#FF6B35',
     paddingHorizontal: 30,
     paddingVertical: 15,
     borderRadius: 25,
