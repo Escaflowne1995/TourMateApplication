@@ -172,7 +172,7 @@ const Signup = ({ navigation, route }) => {
   };
 
   return (
-    <AuthScreenLayout colors={colors} backgroundIndex={1}>
+    <AuthScreenLayout colors={colors} backgroundIndex={1} showIcons={false}>
       <View style={styles.header}>
         <Text style={styles.subtitle}>Create your account to get started</Text>
       </View>

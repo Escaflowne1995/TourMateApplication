@@ -25,6 +25,7 @@ const AuthScreenLayout = ({
   colors, 
   children, 
   showLogo = true,
+  showIcons = true,
   extraPaddingBottom = 120,
   backgroundIndex = 0
 }) => {
@@ -66,7 +67,7 @@ const AuthScreenLayout = ({
           >
             {showLogo && (
               <View style={styles.header}>
-                <Logo size="normal" />
+                <Logo size="normal" showIcons={showIcons} />
               </View>
             )}
             

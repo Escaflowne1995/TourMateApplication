@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-const Logo = ({ size = 'normal' }) => {
+const Logo = ({ size = 'normal', showIcons = true }) => {
   // Calculate dimensions based on size - making them bigger
   const iconSize = size === 'large' ? 55 : size === 'small' ? 35 : 45;
   const titleSize = size === 'large' ? 42 : size === 'small' ? 26 : 34;
@@ -12,21 +12,23 @@ const Logo = ({ size = 'normal' }) => {
 
   return (
     <View style={styles.container}>
-      {/* Globe Icon to represent travel */}
-      <View style={styles.iconContainer}>
-        <Ionicons 
-          name="earth" 
-          size={iconSize} 
-          color="#ff8c42" 
-          style={styles.globeIcon}
-        />
-        <Ionicons 
-          name="airplane" 
-          size={iconSize * 0.6} 
-          color="#ff6b1a" 
-          style={styles.airplaneIcon}
-        />
-      </View>
+      {/* Globe Icon to represent travel - only show if showIcons is true */}
+      {showIcons && (
+        <View style={styles.iconContainer}>
+          <Ionicons 
+            name="earth" 
+            size={iconSize} 
+            color="#ff8c42" 
+            style={styles.globeIcon}
+          />
+          <Ionicons 
+            name="airplane" 
+            size={iconSize * 0.6} 
+            color="#ff6b1a" 
+            style={styles.airplaneIcon}
+          />
+        </View>
+      )}
       
       {/* TourMate Text */}
       <Text style={[styles.title, { fontSize: titleSize }]}>TourMate</Text>
